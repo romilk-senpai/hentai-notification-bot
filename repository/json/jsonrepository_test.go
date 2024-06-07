@@ -21,7 +21,7 @@ func (m MockIdentifiable) GetUuid() string {
 
 func TestJsonRepository_Create(t *testing.T) {
 	dir := t.TempDir()
-	repo := JsonRepository[MockIdentifiable]{FilePath: dir}
+	repo := JsonRepository[MockIdentifiable]{Path: dir}
 
 	record := MockIdentifiable{
 		Uuid:     "uuid",
@@ -56,7 +56,7 @@ func TestJsonRepository_Create(t *testing.T) {
 
 func TestJsonRepository_Read(t *testing.T) {
 	dir := t.TempDir()
-	repo := JsonRepository[MockIdentifiable]{FilePath: dir}
+	repo := JsonRepository[MockIdentifiable]{Path: dir}
 
 	record := MockIdentifiable{
 		Uuid:     "uuid",
@@ -88,7 +88,7 @@ func TestJsonRepository_Read(t *testing.T) {
 
 func TestJsonRepository_Update(t *testing.T) {
 	dir := t.TempDir()
-	repo := JsonRepository[MockIdentifiable]{FilePath: dir}
+	repo := JsonRepository[MockIdentifiable]{Path: dir}
 
 	record := MockIdentifiable{
 		Uuid:     "uuid",
@@ -129,7 +129,7 @@ func TestJsonRepository_Update(t *testing.T) {
 
 func TestJsonRepository_Delete(t *testing.T) {
 	dir := t.TempDir()
-	repo := JsonRepository[MockIdentifiable]{FilePath: dir}
+	repo := JsonRepository[MockIdentifiable]{Path: dir}
 
 	record := MockIdentifiable{
 		Uuid:     "uuid",
@@ -159,7 +159,7 @@ func TestJsonRepository_Delete(t *testing.T) {
 
 func TestJsonRepository_Exists(t *testing.T) {
 	dir := t.TempDir()
-	repo := JsonRepository[MockIdentifiable]{FilePath: dir}
+	repo := JsonRepository[MockIdentifiable]{Path: dir}
 
 	record := MockIdentifiable{
 		Uuid:     "uuid",

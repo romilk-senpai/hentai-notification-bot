@@ -13,10 +13,18 @@ type EventType int
 const (
 	Unknown EventType = iota
 	Message
+	Command
 )
 
 type Event struct {
-	Type EventType
-	Text string
-	Meta interface{}
+	UserHash    string
+	Type        EventType
+	Text        string
+	CommandInfo CommandInfo
+	Meta        interface{}
+}
+
+type CommandInfo struct {
+	Command   string
+	Arguments string
 }

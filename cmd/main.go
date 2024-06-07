@@ -8,6 +8,7 @@ import (
 	"hentai-notification-bot-re/handler"
 	"hentai-notification-bot-re/parser"
 	"hentai-notification-bot-re/parser/nhentai"
+	jsonrepository "hentai-notification-bot-re/repository/json"
 	"log"
 )
 
@@ -26,9 +27,12 @@ func Main() {
 
 	parsers := []parser.Parser{nhentai.New(nhentaiHost)}
 
+	var repo jsonrepository.JsonRepository[tgcontroller.UserInfo]
+	tgRepo := repo.New("local-cache")
+
 	tgController := tgcontroller.New(
 		tgclient.New(tgBotHost, parseflag.TgToken),
-		nil,
+		tgRepo,
 		parsers,
 	)
 
