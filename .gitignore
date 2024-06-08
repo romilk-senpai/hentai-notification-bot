@@ -21,5 +21,8 @@
 go.work
 go.work.sum
 
-# runtime folders
+# Runtime created folders
 local-cache/
+
+# IDE files
+.idea/
