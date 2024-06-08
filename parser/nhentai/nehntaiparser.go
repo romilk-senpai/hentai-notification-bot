@@ -10,12 +10,15 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
+	"unicode"
 )
 
 const (
-	userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
-	cookie    = "cf_clearance=URomM.uxgeqeCA5WIeTkjZvZDOWgCyqS0x9pGl5X4_0-1717624444-1.0.1.1-GGJX6eqEJwVLCEokc1c6k7RraeK94u5_OUjkm8.xMaj1MXlUShSJgt13dYlOF2VXbFX5.VlbauUE3QnRYB7Chw; csrftoken=A8Evs3ba7wcJWYAwMSr8yV9b146eHrnF4aWhPGVrJ92kHOKP1xuQIpmL1qYr5Oii;"
+	ParserName = "nhentai"
+	UserAgent  = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+	Cookie     = "cf_clearance=sHHnH3TWTBYVaOobFoJ26gAXq1rwzi3hJLLoQqPKwk0-1717802582-1.0.1.1-L5HdxSoHQSVatzYwFovKNH8iPr5TlF3JbrA6kKKTVniweF2QefhQqaQcUzNUIodAdYlb9572Lq3XJhwNYqGbHg; csrftoken=jBjFAXVV0GWYJWXScXrcTFC0Li8kTRYRGBikVZudkW7CqeBZWfj6j6fT8g9FLVQE;"
 )
 
 type Parser struct {
@@ -28,6 +31,10 @@ func New(host string) *Parser {
 		host:   host,
 		client: http.Client{},
 	}
+}
+
+func (p *Parser) ParserName() string {
+	return ParserName
 }
 
 func (p *Parser) ParseOne(query string) (*parser.Manga, error) {
@@ -77,6 +84,46 @@ func (p *Parser) ParseAll(query string) (manga []parser.Manga, err error) {
 	return mangoes, nil
 }
 
+func (p *Parser) ParseQuantity(query string) (quantity int, err error) {
+	defer func() { err = e.WrapIfErr("can't process request", err) }()
+
+	data, err := p.doRequest("/search/", "q="+strings.ReplaceAll(query, " ", "+"))
+
+	if err != nil {
+		return 0, err
+	}
+
+	reader := bytes.NewReader(data)
+
+	doc, err := goquery.NewDocumentFromReader(reader)
+
+	if err != nil {
+		return 0, err
+	}
+
+	contentBlock := doc.Find("div#content")
+	resultCountEl := contentBlock.Find("h1").First().Text()
+
+	return parseNumeric(resultCountEl)
+}
+
+func parseNumeric(input string) (int, error) {
+	cleaned := strings.Map(func(r rune) rune {
+		if unicode.IsDigit(r) {
+			return r
+		}
+		return -1
+	}, input)
+
+	output, err := strconv.Atoi(cleaned)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return output, nil
+}
+
 func (p *Parser) doRequest(path string, rawQuery string) (data []byte, err error) {
 	defer func() { err = e.WrapIfErr("can't process request", err) }()
 
@@ -89,8 +136,8 @@ func (p *Parser) doRequest(path string, rawQuery string) (data []byte, err error
 
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 
-	req.Header.Add("User-Agent", userAgent)
-	req.Header.Add("Cookie", cookie)
+	req.Header.Add("User-Agent", UserAgent)
+	req.Header.Add("Cookie", Cookie)
 
 	if err != nil {
 		return nil, err
