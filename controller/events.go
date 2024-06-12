@@ -14,6 +14,7 @@ const (
 	Unknown EventType = iota
 	Message
 	Command
+	Callback
 )
 
 type Event struct {

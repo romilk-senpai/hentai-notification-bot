@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"hentai-notification-bot-re/lib/e"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"path"
@@ -96,4 +97,42 @@ func (c *Client) SendMessage(chatID int, text string) error {
 	}
 
 	return nil
+}
+
+func (c *Client) SendStandardMarkup(chatID int) error {
+	q := url.Values{}
+	q.Add("text", "What to do... What to do...")
+	q.Add("chat_id", strconv.Itoa(chatID))
+
+	markup, err := json.Marshal(StandardKeyboardMarkup())
+
+	if err != nil {
+		return err
+	}
+
+	q.Add("reply_markup", string(markup))
+
+	_, err = c.doRequest(sendMessageMethod, q)
+
+	return err
+}
+
+func (c *Client) SendTagManager(chatID int, tagGroups []string) error {
+	q := url.Values{}
+	q.Add("text", "Manage tags")
+	q.Add("chat_id", strconv.Itoa(chatID))
+
+	markup, err := json.Marshal(TagManagerInlineMarkup(tagGroups))
+
+	if err != nil {
+		return err
+	}
+
+	q.Add("reply_markup", string(markup))
+
+	resp, err := c.doRequest(sendMessageMethod, q)
+
+	log.Printf(string(resp))
+
+	return err
 }

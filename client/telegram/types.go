@@ -1,13 +1,23 @@
 package tgclient
 
+const (
+	GetMangaUpdatesMessage = "Get manga updates"
+	ManageTagsMessage      = "Manage tags"
+)
+
 type UpdatesResponse struct {
 	Ok     bool     `json:"ok"`
 	Result []Update `json:"result"`
 }
 
 type Update struct {
-	ID      int              `json:"update_id"`
-	Message *IncomingMessage `json:"message"`
+	ID            int              `json:"update_id"`
+	Message       *IncomingMessage `json:"message,omitempty"`
+	CallbackQuery *CallbackQuery   `json:"callback_query,omitempty"`
+}
+
+type CallbackQuery struct {
+	Message *IncomingMessage `json:"message,omitempty"`
 }
 
 type IncomingMessage struct {
@@ -65,4 +75,54 @@ type From struct {
 
 type Chat struct {
 	ID int `json:"id"`
+}
+
+type InlineKeyboard struct {
+	InlineKeyboard [][]InlineKeyboardButton `json:"inline_keyboard"`
+}
+
+type InlineKeyboardButton struct {
+	Text         string `json:"text"`
+	CallbackData string `json:"callback_data"`
+}
+
+func TagManagerInlineMarkup(tagGroups []string) InlineKeyboard {
+	keyboard := [][]InlineKeyboardButton{
+		{
+			{Text: "Add tag group", CallbackData: "add_tag_group"},
+		},
+	}
+
+	for _, tagGroup := range tagGroups {
+		row := []InlineKeyboardButton{
+			{Text: tagGroup, CallbackData: "nothing"},
+			{Text: "❌", CallbackData: "del_" + tagGroup},
+		}
+
+		keyboard = append(keyboard, row)
+	}
+
+	return InlineKeyboard{
+		InlineKeyboard: keyboard,
+	}
+}
+
+type ReplyKeyboardMarkup struct {
+	Keyboard        [][]KeyboardButton `json:"keyboard"`
+	ResizeKeyboard  bool               `json:"resize_keyboard,omitempty"`
+	OneTimeKeyboard bool               `json:"one_time_keyboard,omitempty"`
+}
+
+type KeyboardButton struct {
+	Text string `json:"text"`
+}
+
+func StandardKeyboardMarkup() ReplyKeyboardMarkup {
+	return ReplyKeyboardMarkup{
+		Keyboard: [][]KeyboardButton{
+			{{Text: GetMangaUpdatesMessage}, {Text: ManageTagsMessage}},
+		},
+		ResizeKeyboard:  true,
+		OneTimeKeyboard: false,
+	}
 }

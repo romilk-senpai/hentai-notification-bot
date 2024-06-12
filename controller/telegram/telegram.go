@@ -6,10 +6,11 @@ import (
 	"errors"
 	"fmt"
 	tgclient "hentai-notification-bot-re/client/telegram"
-	"hentai-notification-bot-re/controller"
+	events "hentai-notification-bot-re/controller"
 	"hentai-notification-bot-re/lib/e"
 	"hentai-notification-bot-re/parser"
 	"hentai-notification-bot-re/repository"
+	"log"
 )
 
 type Controller struct {
@@ -83,13 +84,19 @@ func event(u tgclient.Update) events.Event {
 	updateType := fetchType(u)
 
 	res := events.Event{
-		UserHash:    md5Hash(fmt.Sprintf("%s%d", u.Message.From.Username, u.Message.Chat.ID)),
+		UserHash:    "",
 		Type:        updateType,
 		Text:        fetchText(u),
 		CommandInfo: fetchCommand(u),
 	}
 
-	if updateType != events.Unknown {
+	if updateType == events.Callback {
+		log.Printf(u.CallbackQuery.Message.Text)
+	}
+
+	if updateType == events.Message || updateType == events.Command {
+		res.UserHash = md5Hash(fmt.Sprintf("%s%d", u.Message.From.Username, u.Message.Chat.ID))
+
 		res.Meta = Meta{
 			ChatID:   u.Message.Chat.ID,
 			Username: u.Message.From.Username,
@@ -100,15 +107,17 @@ func event(u tgclient.Update) events.Event {
 }
 
 func fetchType(u tgclient.Update) events.EventType {
-	if u.Message.IsCommand() {
-		return events.Command
+	if u.Message != nil {
+		if u.Message.IsCommand() {
+			return events.Command
+		}
+
+		return events.Message
+	} else if u.CallbackQuery != nil {
+		return events.Callback
 	}
 
-	if u.Message == nil {
-		return events.Unknown
-	}
-
-	return events.Message
+	return events.Unknown
 }
 
 func fetchText(u tgclient.Update) string {
