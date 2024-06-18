@@ -16,7 +16,7 @@ func (c *Controller) processMessage(event events.Event) error {
 		return e.Wrap("can't process message", err)
 	}
 
-	log.Printf("message from %s: %s", meta.Username, event.Text)
+	log.Printf("message from %s: %s", meta.Update.Message.From.Username, event.Text)
 
 	if len(event.Text) == 0 {
 		return nil
@@ -47,7 +47,7 @@ func (c *Controller) getUpdates(event events.Event) (err error) {
 		return err
 	}
 
-	for tagGroup, parserMap := range userInfo.SubscribedTags {
+	userInfo.SubscribedTags.ForEach(func(tagGroup string, parserMap map[string]int) error {
 		for _, mParser := range c.parsers {
 			remoteQuantity, err := mParser.ParseQuantity(tagGroup)
 
@@ -74,7 +74,7 @@ func (c *Controller) getUpdates(event events.Event) (err error) {
 			if savedQuantity >= remoteQuantity {
 				responseBuilder.WriteString("no updates")
 
-				if err = c.client.SendMessage(meta.ChatID, responseBuilder.String()); err != nil {
+				if err = c.client.SendMessage(meta.Update.Message.Chat.ID, responseBuilder.String()); err != nil {
 					return err
 				}
 
@@ -90,7 +90,7 @@ func (c *Controller) getUpdates(event events.Event) (err error) {
 			if len(mangoes) == 0 {
 				responseBuilder.WriteString("no manga with the given tags found")
 
-				_ = c.client.SendMessage(meta.ChatID, responseBuilder.String())
+				_ = c.client.SendMessage(meta.Update.Message.Chat.ID, responseBuilder.String())
 
 				continue
 			}
@@ -101,7 +101,7 @@ func (c *Controller) getUpdates(event events.Event) (err error) {
 				responseBuilder.WriteString(fmt.Sprintf("<a href=\"%s\">%s</a>\n", manga.Url, manga.Name))
 			}
 
-			if err = c.client.SendMessage(meta.ChatID, responseBuilder.String()); err != nil {
+			if err = c.client.SendMessage(meta.Update.Message.Chat.ID, responseBuilder.String()); err != nil {
 				return err
 			}
 
@@ -111,7 +111,9 @@ func (c *Controller) getUpdates(event events.Event) (err error) {
 				return err
 			}
 		}
-	}
+
+		return nil
+	})
 
 	return nil
 }
@@ -131,11 +133,5 @@ func (c *Controller) manageTags(event events.Event) (err error) {
 		return err
 	}
 
-	tagGroups := make([]string, 0, len(userInfo.SubscribedTags))
-
-	for key := range userInfo.SubscribedTags {
-		tagGroups = append(tagGroups, key)
-	}
-
-	return c.client.SendTagManager(meta.ChatID, tagGroups)
+	return c.client.SendTagManager(meta.Update.Message.Chat.ID, userInfo.SubscribedTags.Tags)
 }

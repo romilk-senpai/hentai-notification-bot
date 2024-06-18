@@ -1,5 +1,7 @@
 package tgclient
 
+import "strings"
+
 const (
 	GetMangaUpdatesMessage = "Get manga updates"
 	ManageTagsMessage      = "Manage tags"
@@ -11,24 +13,45 @@ type UpdatesResponse struct {
 }
 
 type Update struct {
-	ID            int              `json:"update_id"`
-	Message       *IncomingMessage `json:"message,omitempty"`
-	CallbackQuery *CallbackQuery   `json:"callback_query,omitempty"`
+	ID            int            `json:"update_id"`
+	Message       *Message       `json:"message,omitempty"`
+	CallbackQuery *CallbackQuery `json:"callback_query,omitempty"`
 }
 
 type CallbackQuery struct {
-	Message *IncomingMessage `json:"message,omitempty"`
+	ID      string   `json:"id"`
+	From    *User    `json:"from"`
+	Message *Message `json:"message,omitempty"`
+	Data    string   `json:"data,omitempty"`
 }
 
-type IncomingMessage struct {
+func (callbackData *CallbackQuery) ParseCallbackData() *CallbackData {
+	before, after, found := strings.Cut(callbackData.Data, ":")
+	data := CallbackData{}
+	data.Key = before
+	if found {
+		data.Value = after
+	} else {
+		data.Value = before
+	}
+	return &data
+}
+
+type CallbackData struct {
+	Key   string
+	Value string
+}
+
+type Message struct {
 	Text     string          `json:"text"`
-	From     From            `json:"from"`
+	ID       int             `json:"message_id"`
+	From     User            `json:"from"`
 	Chat     Chat            `json:"chat"`
 	Entities []MessageEntity `json:"entities"`
 }
 
-func (m *IncomingMessage) IsCommand() bool {
-	if m.Entities == nil || len(m.Entities) == 0 {
+func (m *Message) IsCommand() bool {
+	if m == nil || m.Entities == nil || len(m.Entities) == 0 {
 		return false
 	}
 
@@ -36,7 +59,7 @@ func (m *IncomingMessage) IsCommand() bool {
 	return entity.Offset == 0 && entity.IsCommand()
 }
 
-func (m *IncomingMessage) Command() string {
+func (m *Message) Command() string {
 	if !m.IsCommand() {
 		return ""
 	}
@@ -45,7 +68,7 @@ func (m *IncomingMessage) Command() string {
 	return m.Text[1:entity.Length]
 }
 
-func (m *IncomingMessage) CommandArguments() string {
+func (m *Message) CommandArguments() string {
 	if !m.IsCommand() {
 		return ""
 	}
@@ -69,7 +92,7 @@ func (e *MessageEntity) IsCommand() bool {
 	return e.Type == "bot_command"
 }
 
-type From struct {
+type User struct {
 	Username string `json:"username"`
 }
 
@@ -89,18 +112,24 @@ type InlineKeyboardButton struct {
 func TagManagerInlineMarkup(tagGroups []string) InlineKeyboard {
 	keyboard := [][]InlineKeyboardButton{
 		{
-			{Text: "Add tag group", CallbackData: "add_tag_group"},
+			{Text: "Add tag group", CallbackData: "addTagGroup"},
 		},
 	}
 
 	for _, tagGroup := range tagGroups {
 		row := []InlineKeyboardButton{
 			{Text: tagGroup, CallbackData: "nothing"},
-			{Text: "❌", CallbackData: "del_" + tagGroup},
+			{Text: "❌", CallbackData: "deleteTags:" + tagGroup},
 		}
 
 		keyboard = append(keyboard, row)
 	}
+
+	cancelRow := []InlineKeyboardButton{
+		{Text: "Cancel", CallbackData: "cancelManage"},
+	}
+
+	keyboard = append(keyboard, cancelRow)
 
 	return InlineKeyboard{
 		InlineKeyboard: keyboard,

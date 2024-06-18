@@ -1,6 +1,7 @@
 package tgcontroller
 
+import tgclient "hentai-notification-bot-re/client/telegram"
+
 type Meta struct {
-	ChatID   int
-	Username string
+	Update tgclient.Update
 }

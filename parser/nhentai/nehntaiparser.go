@@ -18,7 +18,7 @@ import (
 const (
 	ParserName = "nhentai"
 	UserAgent  = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
-	Cookie     = "cf_clearance=sHHnH3TWTBYVaOobFoJ26gAXq1rwzi3hJLLoQqPKwk0-1717802582-1.0.1.1-L5HdxSoHQSVatzYwFovKNH8iPr5TlF3JbrA6kKKTVniweF2QefhQqaQcUzNUIodAdYlb9572Lq3XJhwNYqGbHg; csrftoken=jBjFAXVV0GWYJWXScXrcTFC0Li8kTRYRGBikVZudkW7CqeBZWfj6j6fT8g9FLVQE;"
+	Cookie     = "cf_clearance=YzqnqFuJdVXXB9oUz7T7ZeY79jpNb06u2lLyjF.0VGI-1718156477-1.0.1.1-jxq9tbq.0QB6ZSyI8APTWE7bf00aR4XoQ0v6iLoJX0d10DqPxIKOGhdX6qOLu5PHkUXLGaQgD7UpAJ50q1mjqw; csrftoken=4SzoyNaaweXt7ifwyBOoCdjs97t0OGRRdfZuP9DNO8LmRT7WLdMRhc658j8QCJEk;"
 )
 
 type Parser struct {

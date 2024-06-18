@@ -2,6 +2,7 @@ package tgclient
 
 import (
 	"encoding/json"
+	"errors"
 	"hentai-notification-bot-re/lib/e"
 	"io"
 	"log"
@@ -18,8 +19,10 @@ type Client struct {
 }
 
 const (
-	getUpdatesMethod  = "getUpdates"
-	sendMessageMethod = "sendMessage"
+	getUpdatesMethod    = "getUpdates"
+	sendMessageMethod   = "sendMessage"
+	deleteMessageMethod = "deleteMessage"
+	editMessageMethod   = "editMessageText"
 )
 
 func New(host string, token string) *Client {
@@ -79,6 +82,10 @@ func (c *Client) doRequest(method string, query url.Values) (data []byte, err er
 
 	defer func() { _ = resp.Body.Close() }()
 
+	if resp.StatusCode != http.StatusOK {
+		return nil, e.Wrap("request error", errors.New(strconv.Itoa(resp.StatusCode)))
+	}
+
 	body, err := io.ReadAll(resp.Body)
 
 	return body, nil
@@ -130,9 +137,38 @@ func (c *Client) SendTagManager(chatID int, tagGroups []string) error {
 
 	q.Add("reply_markup", string(markup))
 
-	resp, err := c.doRequest(sendMessageMethod, q)
+	_, err = c.doRequest(sendMessageMethod, q)
 
-	log.Printf(string(resp))
+	return err
+}
+
+func (c *Client) EditTagManager(chatID int, messageID int, tagGroups []string) error {
+	q := url.Values{}
+	q.Add("text", "Manage tags")
+	q.Add("chat_id", strconv.Itoa(chatID))
+	q.Add("message_id", strconv.Itoa(messageID))
+
+	markup, err := json.Marshal(TagManagerInlineMarkup(tagGroups))
+
+	if err != nil {
+		return err
+	}
+
+	q.Add("reply_markup", string(markup))
+
+	data, err := c.doRequest(editMessageMethod, q)
+
+	log.Printf(string(data[:]))
+
+	return err
+}
+
+func (c *Client) DeleteMessage(chatID int, messageID int) error {
+	q := url.Values{}
+	q.Add("chat_id", strconv.Itoa(chatID))
+	q.Add("message_id", strconv.Itoa(messageID))
+
+	_, err := c.doRequest(deleteMessageMethod, q)
 
 	return err
 }

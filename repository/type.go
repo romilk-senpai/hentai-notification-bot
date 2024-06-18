@@ -1,6 +1,6 @@
 package repository
 
-type Repository[T any] interface {
+type Repository[T Identifiable] interface {
 	Create(record T) (T, error)
 	Read(uuid string) (T, error)
 	Update(uuid string, newRecord T) (T, error)

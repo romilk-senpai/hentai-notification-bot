@@ -79,7 +79,7 @@ func (r *JsonRepository[T]) Update(uuid string, newRecord T) (T, error) {
 	exists := r.Exists(uuid)
 
 	if !exists {
-		return newRecord, fmt.Errorf("%s record does not exits", uuid)
+		return newRecord, fmt.Errorf("%s record does not exist", uuid)
 	}
 
 	_, err := r.Create(newRecord)

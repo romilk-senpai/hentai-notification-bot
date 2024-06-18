@@ -10,7 +10,6 @@ import (
 	"hentai-notification-bot-re/lib/e"
 	"hentai-notification-bot-re/parser"
 	"hentai-notification-bot-re/repository"
-	"log"
 )
 
 type Controller struct {
@@ -40,6 +39,10 @@ func (c *Controller) Process(event events.Event) error {
 	case events.Message:
 		{
 			return c.processMessage(event)
+		}
+	case events.Callback:
+		{
+			return c.processCallback(event)
 		}
 	default:
 		{
@@ -90,16 +93,17 @@ func event(u tgclient.Update) events.Event {
 		CommandInfo: fetchCommand(u),
 	}
 
-	if updateType == events.Callback {
-		log.Printf(u.CallbackQuery.Message.Text)
-	}
-
 	if updateType == events.Message || updateType == events.Command {
 		res.UserHash = md5Hash(fmt.Sprintf("%s%d", u.Message.From.Username, u.Message.Chat.ID))
 
 		res.Meta = Meta{
-			ChatID:   u.Message.Chat.ID,
-			Username: u.Message.From.Username,
+			Update: u,
+		}
+	} else if updateType == events.Callback {
+		res.UserHash = md5Hash(fmt.Sprintf("%s%d", u.CallbackQuery.From.Username, u.CallbackQuery.Message.Chat.ID))
+
+		res.Meta = Meta{
+			Update: u,
 		}
 	}
 

@@ -46,7 +46,7 @@ func (h *Handler) Run() error {
 
 func (h *Handler) handleEvents(events []events.Event) error {
 	for _, event := range events {
-		log.Printf("got new event: %s", event.Text)
+		log.Printf("got new event: %v", event.Type)
 
 		if err := h.processor.Process(event); err != nil {
 			log.Printf("can't handle event: %s", err.Error())

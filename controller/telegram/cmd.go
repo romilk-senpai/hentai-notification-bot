@@ -36,7 +36,7 @@ func (c *Controller) start(event events.Event) error {
 		return err
 	}
 
-	return c.client.SendStandardMarkup(meta.ChatID)
+	return c.client.SendStandardMarkup(meta.Update.Message.Chat.ID)
 }
 
 func (c *Controller) testAdd(event events.Event) (err error) {
@@ -51,7 +51,7 @@ func (c *Controller) testAdd(event events.Event) (err error) {
 	expr, err := processAddExpression(event.CommandInfo.Arguments)
 
 	if err != nil {
-		_ = c.client.SendMessage(meta.ChatID, fmt.Sprintf("Expression error; arg=%s", expr))
+		_ = c.client.SendMessage(meta.Update.Message.Chat.ID, fmt.Sprintf("Expression error; arg=%s", expr))
 
 		return err
 	}
@@ -64,27 +64,33 @@ func (c *Controller) testAdd(event events.Event) (err error) {
 		}
 
 		if userInfo.SubscribedTags == nil {
-			userInfo.SubscribedTags = make(map[string]map[string]int)
-			userInfo.SubscribedTags[expr] = make(map[string]int)
+			userInfo.SubscribedTags = NewTagMap()
+		}
+
+		_, exists := userInfo.SubscribedTags.Get(expr)
+
+		if !exists {
+			userInfo.SubscribedTags.Set(expr, make(map[string]int))
 		}
 
 		_, err = c.repository.Update(event.UserHash, userInfo)
+
 	} else {
-		newUserTags := make(map[string]map[string]int)
-		newUserTags[expr] = make(map[string]int)
+		newUserTags := NewTagMap()
+		newUserTags.Set(expr, make(map[string]int))
 
 		expr, err := processAddExpression(event.CommandInfo.Arguments)
 
 		if err != nil {
-			_ = c.client.SendMessage(meta.ChatID, fmt.Sprintf("Expression error; arg=%s", expr))
+			_ = c.client.SendMessage(meta.Update.Message.Chat.ID, fmt.Sprintf("Expression error; arg=%s", expr))
 
 			return err
 		}
 
 		_, err = c.repository.Create(UserInfo{
 			Uuid:           event.UserHash,
-			Username:       meta.Username,
-			ChatID:         meta.ChatID,
+			Username:       meta.Update.Message.From.Username,
+			ChatID:         meta.Update.Message.Chat.ID,
 			SubscribedTags: newUserTags,
 		})
 
@@ -93,7 +99,7 @@ func (c *Controller) testAdd(event events.Event) (err error) {
 		}
 	}
 
-	return c.client.SendMessage(meta.ChatID, fmt.Sprintf("Added; arg=%s", expr))
+	return c.client.SendMessage(meta.Update.Message.Chat.ID, fmt.Sprintf("Added; arg=%s", expr))
 }
 
 func (c *Controller) unknown(event events.Event) error {
@@ -103,7 +109,7 @@ func (c *Controller) unknown(event events.Event) error {
 		return err
 	}
 
-	return c.client.SendMessage(meta.ChatID, "Unknown command")
+	return c.client.SendMessage(meta.Update.Message.Chat.ID, "Unknown command")
 }
 
 func processAddExpression(expression string) (string, error) {
