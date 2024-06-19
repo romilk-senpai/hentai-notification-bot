@@ -27,7 +27,7 @@ func Main() {
 
 	parsers := []parser.Parser{nhentai.New(nhentaiHost)}
 
-	var repo jsonrepository.JsonRepository[tgcontroller.UserInfo]
+	var repo jsonrepository.JsonRepository[*tgcontroller.UserInfo]
 	tgRepo := repo.New("local-cache")
 
 	tgController := tgcontroller.New(

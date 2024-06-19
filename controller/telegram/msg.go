@@ -9,12 +9,10 @@ import (
 	"strings"
 )
 
-func (c *Controller) processMessage(event events.Event) error {
-	meta, err := meta(event)
+func (c *Controller) processMessage(event events.Event) (err error) {
+	defer func() { err = e.WrapIfErr("can't process message", err) }()
 
-	if err != nil {
-		return e.Wrap("can't process message", err)
-	}
+	meta, err := meta(event)
 
 	log.Printf("message from %s: %s", meta.Update.Message.From.Username, event.Text)
 
@@ -31,15 +29,58 @@ func (c *Controller) processMessage(event events.Event) error {
 		{
 			return c.manageTags(event)
 		}
+	default:
+		{
+			return c.processPlaneMessage(event)
+		}
+	}
+}
+
+func (c *Controller) processPlaneMessage(event events.Event) (err error) {
+	defer func() { err = e.WrapIfErr("can't process plane message", err) }()
+
+	meta, err := meta(event)
+
+	if err != nil {
+		return err
 	}
 
-	return nil
+	userInfo, err := c.repository.Read(event.UserHash)
+
+	if err != nil {
+		return err
+	}
+
+	if !userInfo.AddingTags {
+		return nil
+	}
+
+	userInfo.AddingTags = false
+	_, err = c.repository.Update(userInfo.Uuid, userInfo)
+
+	if err != nil {
+		return err
+	}
+
+	err = c.addTagGroup(event.UserHash, meta.Update.Message.Text)
+
+	if err != nil {
+		return err
+	}
+
+	userInfo, err = c.repository.Read(userInfo.Uuid)
+
+	return c.client.SendTagManager(userInfo.ChatID, userInfo.SubscribedTags.Tags)
 }
 
 func (c *Controller) getUpdates(event events.Event) (err error) {
+	defer func() { err = e.WrapIfErr("can't get updates", err) }()
+
 	meta, err := meta(event)
 
-	defer func() { err = e.WrapIfErr("can't get updates", err) }()
+	if err != nil {
+		return err
+	}
 
 	userInfo, err := c.repository.Read(event.UserHash)
 
@@ -119,9 +160,9 @@ func (c *Controller) getUpdates(event events.Event) (err error) {
 }
 
 func (c *Controller) manageTags(event events.Event) (err error) {
-	meta, err := meta(event)
-
 	defer func() { err = e.WrapIfErr("can't manage tags", err) }()
+
+	meta, err := meta(event)
 
 	if err != nil {
 		return err

@@ -5,8 +5,10 @@ type UserInfo struct {
 	Username       string  `json:"username"`
 	ChatID         int     `json:"chat_id"`
 	SubscribedTags *TagMap `json:"subscribed_tags"`
+	AddingTags     bool    `json:"addingTags"`
+	ManagerMessage int     `json:"managerMessage"`
 }
 
-func (u UserInfo) GetUuid() string {
+func (u *UserInfo) GetUuid() string {
 	return u.Uuid
 }

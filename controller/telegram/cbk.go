@@ -20,7 +20,7 @@ func (c *Controller) processCallback(event events.Event) error {
 	switch data.Key {
 	case "addTagGroup":
 		{
-			return c.addTagGroup(data, user)
+			return c.addTagGroupCbk(meta.Update.CallbackQuery, user)
 		}
 	case "deleteTags":
 		{
@@ -36,15 +36,25 @@ func (c *Controller) processCallback(event events.Event) error {
 	return nil
 }
 
-func (c *Controller) addTagGroup(data *tgclient.CallbackData, user UserInfo) error {
-	return nil
+func (c *Controller) addTagGroupCbk(query *tgclient.CallbackQuery, userInfo *UserInfo) error {
+	userInfo.AddingTags = true
+
+	if _, err := c.repository.Update(userInfo.Uuid, userInfo); err != nil {
+		return err
+	}
+
+	if err := c.client.DeleteMessage(query.Message.Chat.ID, query.Message.ID); err != nil {
+		return err
+	}
+
+	return c.client.SendMessage(userInfo.ChatID, "Please type new tag group")
 }
 
 func (c *Controller) cancelProcessTags(query *tgclient.CallbackQuery) error {
 	return c.client.DeleteMessage(query.Message.Chat.ID, query.Message.ID)
 }
 
-func (c *Controller) deleteTagGroup(query *tgclient.CallbackQuery, data *tgclient.CallbackData, userInfo UserInfo) error {
+func (c *Controller) deleteTagGroup(query *tgclient.CallbackQuery, data *tgclient.CallbackData, userInfo *UserInfo) error {
 	exists := userInfo.SubscribedTags.SubscribedToTag(data.Value)
 
 	if !exists {

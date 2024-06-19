@@ -15,11 +15,11 @@ import (
 type Controller struct {
 	client     *tgclient.Client
 	offset     int
-	repository repository.Repository[UserInfo]
+	repository repository.Repository[*UserInfo]
 	parsers    []parser.Parser
 }
 
-func New(client *tgclient.Client, repository repository.Repository[UserInfo], parsers []parser.Parser) *Controller {
+func New(client *tgclient.Client, repository repository.Repository[*UserInfo], parsers []parser.Parser) *Controller {
 	return &Controller{
 		client:     client,
 		repository: repository,
