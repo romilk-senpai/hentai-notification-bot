@@ -98,24 +98,27 @@ func (c *Controller) getUpdates(event events.Event) (err error) {
 		return err
 	}
 
+	var responseBuilder strings.Builder
+
 	userInfo.SubscribedTags.ForEach(func(tagGroup string, parserMap map[string]int) error {
-		for _, mParser := range c.parsers {
-			remoteQuantity, err := mParser.ParseQuantity(tagGroup)
+		responseBuilder.WriteString(fmt.Sprintf("Updates on <b><u>%s</u></b>\n", tagGroup))
+		for _, parser := range c.parsers {
+			remoteQuantity, err := parser.ParseQuantity(tagGroup)
 
 			if err != nil {
 				return e.Wrap("parser error", err)
 			}
 
-			savedQuantity, ok := parserMap[mParser.ParserName()]
+			savedQuantity, ok := parserMap[parser.ParserName()]
 
-			var responseBuilder strings.Builder
+			var parserResponseBuilder strings.Builder
 
-			responseBuilder.WriteString(fmt.Sprintf("%s updates:\n", mParser.ParserName()))
+			parserResponseBuilder.WriteString(fmt.Sprintf("\t<a href=\"%s\">%s (%d)</a>\n", parser.QueryToLink(tagGroup), parser.ParserName(), remoteQuantity-savedQuantity))
 
 			if !ok {
 				savedQuantity = remoteQuantity
 
-				parserMap[mParser.ParserName()] = savedQuantity
+				parserMap[parser.ParserName()] = savedQuantity
 
 				if _, err = c.repository.Update(event.UserHash, userInfo); err != nil {
 					return err
@@ -123,25 +126,21 @@ func (c *Controller) getUpdates(event events.Event) (err error) {
 			}
 
 			if savedQuantity >= remoteQuantity {
-				responseBuilder.WriteString("no updates")
-
-				if err = c.client.SendMessage(meta.Update.Message.Chat.ID, responseBuilder.String()); err != nil {
-					return err
-				}
+				responseBuilder.WriteString(parserResponseBuilder.String() + "\n")
 
 				continue
 			}
 
-			mangoes, err := mParser.ParseAll(tagGroup)
+			mangoes, err := parser.ParseAll(tagGroup)
 
 			if err != nil {
 				return err
 			}
 
 			if len(mangoes) == 0 {
-				responseBuilder.WriteString("no manga with the given tags found")
+				parserResponseBuilder.WriteString("\tNo manga with the given tags found\n")
 
-				_ = c.client.SendMessage(meta.Update.Message.Chat.ID, responseBuilder.String())
+				responseBuilder.WriteString(parserResponseBuilder.String() + "\n")
 
 				continue
 			}
@@ -149,14 +148,12 @@ func (c *Controller) getUpdates(event events.Event) (err error) {
 			for i := 0; i < remoteQuantity-savedQuantity; i++ {
 				manga := mangoes[i]
 
-				responseBuilder.WriteString(fmt.Sprintf("<a href=\"%s\">%s</a>\n", manga.Url, manga.Name))
+				parserResponseBuilder.WriteString(fmt.Sprintf("\t<a href=\"%s\">%s</a>\n", manga.Url, manga.Name))
 			}
 
-			if err = c.client.SendMessage(meta.Update.Message.Chat.ID, responseBuilder.String()); err != nil {
-				return err
-			}
+			responseBuilder.WriteString(parserResponseBuilder.String() + "\n")
 
-			parserMap[mParser.ParserName()] = remoteQuantity
+			parserMap[parser.ParserName()] = remoteQuantity
 
 			if _, err = c.repository.Update(event.UserHash, userInfo); err != nil {
 				return err
@@ -165,6 +162,10 @@ func (c *Controller) getUpdates(event events.Event) (err error) {
 
 		return nil
 	})
+
+	if err = c.client.SendMessage(meta.Update.Message.Chat.ID, responseBuilder.String()); err != nil {
+		return err
+	}
 
 	return nil
 }
