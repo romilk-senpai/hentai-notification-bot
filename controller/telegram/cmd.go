@@ -47,12 +47,7 @@ func (c *Controller) start(event events.Event) error {
 			return err
 		}
 
-		_, err = c.repository.Create(&UserInfo{
-			Uuid:           event.UserHash,
-			Username:       meta.Update.Message.From.Username,
-			ChatID:         meta.Update.Message.Chat.ID,
-			SubscribedTags: newUserTags,
-		})
+		_, err = c.repository.Create(NewUserInfo(event.UserHash, meta.Update.Message.From.Username, meta.Update.Message.Chat.ID, newUserTags))
 
 		if err != nil {
 			return err
