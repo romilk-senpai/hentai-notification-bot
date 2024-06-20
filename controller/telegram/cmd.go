@@ -11,7 +11,7 @@ const (
 	TestAdd = "addTagGroup"
 )
 
-const startText = "This bot allows to add nhentai queries to track and receive updates on them.\nPress \"Manage Tags\" button and add your tags.\nSeparate them with comma.\nEnjoy!"
+const startText = "This bot allows to add nhentai queries to track and receive updates on them.\nPress \"Manage Tags\" button and add your tags.\nSeparate them with comma e.g. <b>\"sole female, uncensored\"</b>.\nEnjoy!"
 
 func (c *Controller) processCmd(event events.Event) error {
 
