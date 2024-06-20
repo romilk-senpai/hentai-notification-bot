@@ -44,7 +44,7 @@ func (p *Parser) ParseOne(query string) (*parser.Manga, error) {
 func (p *Parser) ParseAll(query string) (manga []parser.Manga, err error) {
 	defer func() { err = e.WrapIfErr("can't process request", err) }()
 
-	data, err := p.doRequest("/search/", "q="+strings.ReplaceAll(query, " ", "+"))
+	data, err := p.doRequest("/search/", "q="+url.QueryEscape(query))
 
 	if err != nil {
 		return nil, err
@@ -112,7 +112,7 @@ func (p *Parser) QueryToLink(query string) string {
 		Scheme:   "https",
 		Host:     p.host,
 		Path:     "/search/",
-		RawQuery: "q=" + strings.ReplaceAll(query, " ", "+"),
+		RawQuery: "q=" + url.QueryEscape(query),
 	}
 
 	return u.String()
