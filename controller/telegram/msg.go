@@ -111,10 +111,6 @@ func (c *Controller) getUpdates(event events.Event) (err error) {
 
 			savedQuantity, ok := parserMap[parser.ParserName()]
 
-			var parserResponseBuilder strings.Builder
-
-			parserResponseBuilder.WriteString(fmt.Sprintf("\t<a href=\"%s\">%s (%d)</a>\n", parser.QueryToLink(tagGroup), parser.ParserName(), remoteQuantity-savedQuantity))
-
 			if !ok {
 				savedQuantity = remoteQuantity
 
@@ -124,6 +120,9 @@ func (c *Controller) getUpdates(event events.Event) (err error) {
 					return err
 				}
 			}
+
+			var parserResponseBuilder strings.Builder
+			parserResponseBuilder.WriteString(fmt.Sprintf("\t<a href=\"%s\">%s (%d)</a>\n", parser.QueryToLink(tagGroup), parser.ParserName(), remoteQuantity-savedQuantity))
 
 			if savedQuantity >= remoteQuantity {
 				responseBuilder.WriteString(parserResponseBuilder.String() + "\n")
