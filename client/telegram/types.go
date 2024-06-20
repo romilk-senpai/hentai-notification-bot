@@ -13,16 +13,16 @@ type UpdatesResponse struct {
 }
 
 type Update struct {
-	ID            int            `json:"update_id"`
-	Message       *Message       `json:"message,omitempty"`
-	CallbackQuery *CallbackQuery `json:"callback_query,omitempty"`
+	ID            int              `json:"update_id"`
+	Message       *IncomingMessage `json:"message,omitempty"`
+	CallbackQuery *CallbackQuery   `json:"callback_query,omitempty"`
 }
 
 type CallbackQuery struct {
-	ID      string   `json:"id"`
-	From    *User    `json:"from"`
-	Message *Message `json:"message,omitempty"`
-	Data    string   `json:"data,omitempty"`
+	ID      string           `json:"id"`
+	From    *User            `json:"from"`
+	Message *IncomingMessage `json:"message,omitempty"`
+	Data    string           `json:"data,omitempty"`
 }
 
 func (callbackData *CallbackQuery) ParseCallbackData() *CallbackData {
@@ -42,7 +42,16 @@ type CallbackData struct {
 	Value string
 }
 
-type Message struct {
+type SendMessageResponse struct {
+	Ok     bool                      `json:"ok"`
+	Result SendMessageResponseResult `json:"result"`
+}
+
+type SendMessageResponseResult struct {
+	MessageID int `json:"message_id"`
+}
+
+type IncomingMessage struct {
 	Text     string          `json:"text"`
 	ID       int             `json:"message_id"`
 	From     User            `json:"from"`
@@ -50,7 +59,7 @@ type Message struct {
 	Entities []MessageEntity `json:"entities"`
 }
 
-func (m *Message) IsCommand() bool {
+func (m *IncomingMessage) IsCommand() bool {
 	if m == nil || m.Entities == nil || len(m.Entities) == 0 {
 		return false
 	}
@@ -59,7 +68,7 @@ func (m *Message) IsCommand() bool {
 	return entity.Offset == 0 && entity.IsCommand()
 }
 
-func (m *Message) Command() string {
+func (m *IncomingMessage) Command() string {
 	if !m.IsCommand() {
 		return ""
 	}
@@ -68,7 +77,7 @@ func (m *Message) Command() string {
 	return m.Text[1:entity.Length]
 }
 
-func (m *Message) CommandArguments() string {
+func (m *IncomingMessage) CommandArguments() string {
 	if !m.IsCommand() {
 		return ""
 	}

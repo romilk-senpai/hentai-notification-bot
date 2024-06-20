@@ -29,7 +29,7 @@ func (c *Controller) processCallback(event events.Event) error {
 
 	case "cancelManage":
 		{
-			return c.cancelProcessTags(meta.Update.CallbackQuery)
+			return c.cancelProcessTags(meta.Update.CallbackQuery, user)
 		}
 	}
 
@@ -50,8 +50,18 @@ func (c *Controller) addTagGroupCbk(query *tgclient.CallbackQuery, userInfo *Use
 	return c.client.SendMessage(userInfo.ChatID, "Please type new tag group")
 }
 
-func (c *Controller) cancelProcessTags(query *tgclient.CallbackQuery) error {
-	return c.client.DeleteMessage(query.Message.Chat.ID, query.Message.ID)
+func (c *Controller) cancelProcessTags(query *tgclient.CallbackQuery, userInfo *UserInfo) error {
+	err := c.client.DeleteMessage(query.Message.Chat.ID, query.Message.ID)
+
+	if err != nil {
+		return err
+	}
+
+	userInfo.ManagerMessageID = -1
+
+	_, err = c.repository.Update(userInfo.Uuid, userInfo)
+
+	return err
 }
 
 func (c *Controller) deleteTagGroup(query *tgclient.CallbackQuery, data *tgclient.CallbackData, userInfo *UserInfo) error {

@@ -70,7 +70,17 @@ func (c *Controller) processPlaneMessage(event events.Event) (err error) {
 
 	userInfo, err = c.repository.Read(userInfo.Uuid)
 
-	return c.client.SendTagManager(userInfo.ChatID, userInfo.SubscribedTags.Tags)
+	tagManagerMsgID, err := c.client.SendTagManager(userInfo.ChatID, userInfo.SubscribedTags.Tags)
+
+	if err != nil {
+		return err
+	}
+
+	userInfo.ManagerMessageID = tagManagerMsgID
+
+	_, err = c.repository.Update(userInfo.Uuid, userInfo)
+
+	return err
 }
 
 func (c *Controller) getUpdates(event events.Event) (err error) {
@@ -162,8 +172,6 @@ func (c *Controller) getUpdates(event events.Event) (err error) {
 func (c *Controller) manageTags(event events.Event) (err error) {
 	defer func() { err = e.WrapIfErr("can't manage tags", err) }()
 
-	meta, err := meta(event)
-
 	if err != nil {
 		return err
 	}
@@ -174,5 +182,23 @@ func (c *Controller) manageTags(event events.Event) (err error) {
 		return err
 	}
 
-	return c.client.SendTagManager(meta.Update.Message.Chat.ID, userInfo.SubscribedTags.Tags)
+	tagManagerMsgID, err := c.client.SendTagManager(userInfo.ChatID, userInfo.SubscribedTags.Tags)
+
+	if err != nil {
+		return err
+	}
+
+	if userInfo.ManagerMessageID != -1 {
+		err = c.client.DeleteMessage(userInfo.ChatID, userInfo.ManagerMessageID)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	userInfo.ManagerMessageID = tagManagerMsgID
+
+	_, err = c.repository.Update(userInfo.Uuid, userInfo)
+
+	return err
 }

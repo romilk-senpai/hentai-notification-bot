@@ -5,7 +5,6 @@ import (
 	"errors"
 	"hentai-notification-bot-re/lib/e"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"path"
@@ -88,7 +87,7 @@ func (c *Client) doRequest(method string, query url.Values) (data []byte, err er
 
 	body, err := io.ReadAll(resp.Body)
 
-	return body, nil
+	return body, err
 }
 
 func (c *Client) SendMessage(chatID int, text string) error {
@@ -124,7 +123,7 @@ func (c *Client) SendStandardMarkup(chatID int) error {
 	return err
 }
 
-func (c *Client) SendTagManager(chatID int, tagGroups []string) error {
+func (c *Client) SendTagManager(chatID int, tagGroups []string) (int, error) {
 	q := url.Values{}
 	q.Add("text", "Manage tags")
 	q.Add("chat_id", strconv.Itoa(chatID))
@@ -132,14 +131,20 @@ func (c *Client) SendTagManager(chatID int, tagGroups []string) error {
 	markup, err := json.Marshal(TagManagerInlineMarkup(tagGroups))
 
 	if err != nil {
-		return err
+		return -1, err
 	}
 
 	q.Add("reply_markup", string(markup))
 
-	_, err = c.doRequest(sendMessageMethod, q)
+	data, err := c.doRequest(sendMessageMethod, q)
 
-	return err
+	var res SendMessageResponse
+
+	if err := json.Unmarshal(data, &res); err != nil {
+		return -1, err
+	}
+
+	return res.Result.MessageID, err
 }
 
 func (c *Client) EditTagManager(chatID int, messageID int, tagGroups []string) error {
@@ -156,9 +161,7 @@ func (c *Client) EditTagManager(chatID int, messageID int, tagGroups []string) e
 
 	q.Add("reply_markup", string(markup))
 
-	data, err := c.doRequest(editMessageMethod, q)
-
-	log.Printf(string(data[:]))
+	_, err = c.doRequest(editMessageMethod, q)
 
 	return err
 }
