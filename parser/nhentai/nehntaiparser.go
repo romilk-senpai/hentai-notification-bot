@@ -107,6 +107,17 @@ func (p *Parser) ParseQuantity(query string) (quantity int, err error) {
 	return parseNumeric(resultCountEl)
 }
 
+func (p *Parser) QueryToLink(query string) string {
+	u := url.URL{
+		Scheme:   "https",
+		Host:     p.host,
+		Path:     "/search/",
+		RawQuery: "q=" + strings.ReplaceAll(query, " ", "+"),
+	}
+
+	return u.String()
+}
+
 func parseNumeric(input string) (int, error) {
 	cleaned := strings.Map(func(r rune) rune {
 		if unicode.IsDigit(r) {
