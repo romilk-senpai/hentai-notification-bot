@@ -11,6 +11,8 @@ const (
 	TestAdd = "addTagGroup"
 )
 
+const startText = "This bot allows to add nhentai queries to track and receive updates on them.\nPress \"Manage Tags\" button and add your tags.\nSeparate them with comma.\nEnjoy!"
+
 func (c *Controller) processCmd(event events.Event) error {
 
 	command := event.CommandInfo.Command
@@ -54,6 +56,12 @@ func (c *Controller) start(event events.Event) error {
 		}
 	}
 
+	err = c.client.SendMessage(meta.Update.Message.Chat.ID, startText)
+
+	if err != nil {
+		return err
+	}
+
 	return c.client.SendStandardMarkup(meta.Update.Message.Chat.ID)
 }
 
@@ -78,5 +86,7 @@ func (c *Controller) unknown(event events.Event) error {
 }
 
 func processAddExpression(expression string) (string, error) {
+	// TODO: convert to unified format to translate to different parsers formats
+
 	return expression, nil
 }

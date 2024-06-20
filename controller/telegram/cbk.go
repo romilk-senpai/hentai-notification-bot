@@ -61,7 +61,11 @@ func (c *Controller) cancelProcessTags(query *tgclient.CallbackQuery, userInfo *
 
 	_, err = c.repository.Update(userInfo.Uuid, userInfo)
 
-	return err
+	if err != nil {
+		return err
+	}
+
+	return c.client.SendStandardMarkup(query.Message.Chat.ID)
 }
 
 func (c *Controller) deleteTagGroup(query *tgclient.CallbackQuery, data *tgclient.CallbackData, userInfo *UserInfo) error {
