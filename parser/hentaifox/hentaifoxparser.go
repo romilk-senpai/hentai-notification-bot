@@ -1,4 +1,4 @@
-package nhentai
+package hentaifox
 
 import (
 	"bytes"
@@ -9,17 +9,13 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
-	"unicode"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
 const (
-	ParserName = "nhentai"
-	UserAgent  = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
-	Cookie     = "cf_clearance=YzqnqFuJdVXXB9oUz7T7ZeY79jpNb06u2lLyjF.0VGI-1718156477-1.0.1.1-jxq9tbq.0QB6ZSyI8APTWE7bf00aR4XoQ0v6iLoJX0d10DqPxIKOGhdX6qOLu5PHkUXLGaQgD7UpAJ50q1mjqw; csrftoken=4SzoyNaaweXt7ifwyBOoCdjs97t0OGRRdfZuP9DNO8LmRT7WLdMRhc658j8QCJEk;"
+	ParserName = "hentaifox"
 )
 
 type Parser struct {
@@ -61,12 +57,11 @@ func (p *Parser) ParseAll(query string) (manga []parser.Manga, err error) {
 
 	mangoes := make([]parser.Manga, 0)
 
-	contentBlock := doc.Find("div#content")
-	containerBlock := contentBlock.Find("div.container.index-container")
+	galleryBlock := doc.Find("div.lc_galleries")
 
-	containerBlock.Find("div.gallery").Each(func(i int, selection *goquery.Selection) {
-		mangaHref, _ := selection.Find("a.cover").First().Attr("href")
-		mangaName := selection.Find("div.caption").First().Text()
+	galleryBlock.Find("div.thumb").Each(func(i int, selection *goquery.Selection) {
+		mangaHref, _ := selection.Find("div.inner_thumb").Find("a").First().Attr("href")
+		mangaName := selection.Find("div.caption").Find("a").First().Text()
 
 		mangaUrl := url.URL{
 			Scheme: "https",
@@ -102,10 +97,10 @@ func (p *Parser) ParseQuantity(query string) (quantity int, err error) {
 		return 0, err
 	}
 
-	contentBlock := doc.Find("div#content")
-	resultCountEl := contentBlock.Find("h1").First().Text()
+	overviewBlock := doc.Find("div.galleries_overview.g_center")
+	resultCountEl := overviewBlock.Find("h1").First().Text()
 
-	return parseNumeric(resultCountEl)
+	return parser.ParseNumeric(resultCountEl)
 }
 
 func (p *Parser) QueryToLink(query string) string {
@@ -119,23 +114,6 @@ func (p *Parser) QueryToLink(query string) string {
 	return u.String()
 }
 
-func parseNumeric(input string) (int, error) {
-	cleaned := strings.Map(func(r rune) rune {
-		if unicode.IsDigit(r) {
-			return r
-		}
-		return -1
-	}, input)
-
-	output, err := strconv.Atoi(cleaned)
-
-	if err != nil {
-		return 0, err
-	}
-
-	return output, nil
-}
-
 func (p *Parser) doRequest(path string, rawQuery string) (data []byte, err error) {
 	defer func() { err = e.WrapIfErr("can't process request", err) }()
 
@@ -147,9 +125,6 @@ func (p *Parser) doRequest(path string, rawQuery string) (data []byte, err error
 	}
 
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
-
-	req.Header.Add("User-Agent", UserAgent)
-	req.Header.Add("Cookie", Cookie)
 
 	if err != nil {
 		return nil, err

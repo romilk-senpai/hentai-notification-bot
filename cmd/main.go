@@ -7,15 +7,17 @@ import (
 	parseflag "hentai-notification-bot-re/flag"
 	"hentai-notification-bot-re/handler"
 	"hentai-notification-bot-re/parser"
+	"hentai-notification-bot-re/parser/hentaifox"
 	"hentai-notification-bot-re/parser/nhentai"
 	jsonrepository "hentai-notification-bot-re/repository/json"
 	"log"
 )
 
 const (
-	tgBotHost   = "api.telegram.org"
-	nhentaiHost = "nhentai.net"
-	batchSize   = 100
+	tgBotHost     = "api.telegram.org"
+	nhentaiHost   = "nhentai.net"
+	hentaifoxHost = "hentaifox.com"
+	batchSize     = 100
 )
 
 func Main() {
@@ -25,7 +27,7 @@ func Main() {
 		log.Fatal("Telegram Token is empty")
 	}
 
-	parsers := []parser.Parser{nhentai.New(nhentaiHost)}
+	parsers := []parser.Parser{nhentai.New(nhentaiHost), hentaifox.New(hentaifoxHost)}
 
 	var repo jsonrepository.JsonRepository[*tgcontroller.UserInfo]
 	tgRepo := repo.New("local-cache")
