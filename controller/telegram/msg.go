@@ -147,7 +147,7 @@ func (c *Controller) getUpdates(event events.Event) (err error) {
 			for i := 0; i < remoteQuantity-savedQuantity; i++ {
 				manga := mangoes[i]
 
-				parserResponseBuilder.WriteString(fmt.Sprintf("\t<a href=\"%s\">%s</a>\n", manga.Url, manga.Name))
+				parserResponseBuilder.WriteString(fmt.Sprintf("\t\t%d: <a href=\"%s\">%s</a>\n", i+1, manga.Url, manga.Name))
 			}
 
 			responseBuilder.WriteString(parserResponseBuilder.String() + "\n")
