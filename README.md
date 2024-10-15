@@ -2,7 +2,7 @@
 
 This bot allows to add nhentai and hentaifox queries to track and receive updates on them.
 
-[Awailable here](https://t.me/hentai_notification_bot?start=start)
+[Available here](https://t.me/hentai_notification_bot?start=start)
 
 Runs with
 ```shell
