@@ -1,0 +1,7 @@
+env: "local"
+storage_path: "./local-cache/"
+html_path: "./page/index.html"
+http_server:
+  address: "localhost:8082"
+  timeout: 5s
+  idle_timeout: 60s
