@@ -38,9 +38,13 @@ func Main() {
 		parsers,
 	)
 
-	//h := handler.New(tgController, tgController, batchSize)
+	var h handler.Handler
 
-	h := handler.NewTgHanlder(tgClient, tgController)
+	if parseflag.WithWebhook {
+		h = handler.NewTgHanlder(tgClient, tgController)
+	} else {
+		h = handler.NewLocalHandler(tgController, tgController, batchSize)
+	}
 
 	log.Println("service is started")
 
