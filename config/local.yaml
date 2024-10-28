@@ -1,7 +1,7 @@
 env: "local"
 storage_path: "./local-cache/"
 http_server:
-  host: "https://romilk-senpai.alwaysdata.net"
+  host: "" # put your host for webhook here
   address: "localhost:8082"
   timeout: 5s
   idle_timeout: 60s
