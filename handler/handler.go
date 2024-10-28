@@ -6,21 +6,21 @@ import (
 	"time"
 )
 
-type Handler struct {
+type LocalHandler struct {
 	fetcher   events.Fetcher
 	processor events.Processor
 	batchSize int
 }
 
-func New(fetcher events.Fetcher, processor events.Processor, batchSize int) Handler {
-	return Handler{
+func NewLocalHandler(fetcher events.Fetcher, processor events.Processor, batchSize int) *LocalHandler {
+	return &LocalHandler{
 		fetcher:   fetcher,
 		processor: processor,
 		batchSize: batchSize,
 	}
 }
 
-func (h *Handler) Run() error {
+func (h *LocalHandler) Run() error {
 	for {
 		gotEvents, err := h.fetcher.Fetch(h.batchSize)
 
@@ -44,7 +44,7 @@ func (h *Handler) Run() error {
 	}
 }
 
-func (h *Handler) handleEvents(events []events.Event) error {
+func (h *LocalHandler) handleEvents(events []events.Event) error {
 	for _, event := range events {
 		log.Printf("got new event: %v", event.Type)
 

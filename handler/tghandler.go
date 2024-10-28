@@ -14,8 +14,8 @@ type TgHandler struct {
 	processor events.Processor
 }
 
-func NewTgHanlder(tgClient *tgclient.Client, processor events.Processor) TgHandler {
-	return TgHandler{
+func NewTgHanlder(tgClient *tgclient.Client, processor events.Processor) *TgHandler {
+	return &TgHandler{
 		tgClient:  tgClient,
 		processor: processor,
 	}
