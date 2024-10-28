@@ -17,6 +17,10 @@ func (c *Controller) processCallback(event events.Event) error {
 
 	user, err := c.repository.Read(event.UserHash)
 
+	if err != nil {
+		return err
+	}
+
 	switch data.Key {
 	case "addTagGroup":
 		{
