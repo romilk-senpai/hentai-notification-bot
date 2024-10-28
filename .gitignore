@@ -27,4 +27,7 @@ local-cache/
 # IDE files
 .idea/
 
+# Super secret deploy script
+deploy.sh
+
 hentai-notification-bot-re
