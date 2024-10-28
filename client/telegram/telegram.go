@@ -5,6 +5,7 @@ import (
 	"errors"
 	"hentai-notification-bot-re/lib/e"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"path"
@@ -22,6 +23,7 @@ const (
 	sendMessageMethod   = "sendMessage"
 	deleteMessageMethod = "deleteMessage"
 	editMessageMethod   = "editMessageText"
+	setWebhookMethod    = "setWebhook"
 )
 
 func New(host string, token string) *Client {
@@ -172,6 +174,18 @@ func (c *Client) DeleteMessage(chatID int, messageID int) error {
 	q.Add("message_id", strconv.Itoa(messageID))
 
 	_, err := c.doRequest(deleteMessageMethod, q)
+
+	return err
+}
+
+func (c *Client) SetWebhook(webookUrl string) error {
+	q := url.Values{}
+	q.Add("url", webookUrl)
+	r, err := c.doRequest(setWebhookMethod, q)
+
+	s := string(r[:])
+
+	log.Println(s)
 
 	return err
 }

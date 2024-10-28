@@ -31,16 +31,20 @@ func Main() {
 
 	var repo jsonrepository.JsonRepository[*tgcontroller.UserInfo]
 	tgRepo := repo.New("local-cache")
-
+	tgClient := tgclient.New(tgBotHost, parseflag.TgToken)
 	tgController := tgcontroller.New(
-		tgclient.New(tgBotHost, parseflag.TgToken),
+		tgClient,
 		tgRepo,
 		parsers,
 	)
 
-	h := handler.New(tgController, tgController, batchSize)
+	//h := handler.New(tgController, tgController, batchSize)
+
+	h := handler.NewTgHanlder(tgClient, tgController)
+
+	log.Println("service is started")
 
 	if err := h.Run(); err != nil {
-		log.Fatal("service is stopped", err)
+		log.Fatal("service is stopped ", err)
 	}
 }
