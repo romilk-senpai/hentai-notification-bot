@@ -12,12 +12,12 @@ import (
 
 type Config struct {
 	Env         string     `yaml:"env" env-default:"local"`
-	HTMLPath    string     `yaml:"html_path" env-required:"true"`
 	StoragePath string     `yaml:"storage_path" env-required:"true"`
 	HTTPServer  HTTPServer `yaml:"http_server"`
 }
 
 type HTTPServer struct {
+	Host        string        `yaml:"host" env-default:"nil"`
 	Address     string        `yaml:"address" env-default:"localhost:8080"`
 	Timeout     time.Duration `yaml:"timeout" env-default:"4s"`
 	IdleTimeout time.Duration `yaml:"idle_timeout" env-default:"60s"`
