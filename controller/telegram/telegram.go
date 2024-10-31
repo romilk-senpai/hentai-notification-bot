@@ -142,13 +142,13 @@ func event(u tgclient.Update) events.Event {
 	}
 
 	if updateType == events.Message || updateType == events.Command {
-		res.UserHash = md5Hash(fmt.Sprintf("%s%d", u.Message.From.Username, u.Message.Chat.ID))
+		res.UserHash = md5Hash(fmt.Sprintf("%d%d", u.Message.From.ID, u.Message.Chat.ID))
 
 		res.Meta = Meta{
 			Update: u,
 		}
 	} else if updateType == events.Callback {
-		res.UserHash = md5Hash(fmt.Sprintf("%s%d", u.CallbackQuery.From.Username, u.CallbackQuery.Message.Chat.ID))
+		res.UserHash = md5Hash(fmt.Sprintf("%d%d", u.CallbackQuery.From.ID, u.CallbackQuery.Message.Chat.ID))
 
 		res.Meta = Meta{
 			Update: u,
