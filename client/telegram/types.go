@@ -102,6 +102,7 @@ func (e *MessageEntity) IsCommand() bool {
 }
 
 type User struct {
+	ID       int    `json:id`
 	Username string `json:"username"`
 }
 
