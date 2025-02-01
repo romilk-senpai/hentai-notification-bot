@@ -1,5 +1,6 @@
 env: "local"
 storage_path: "./local-cache/"
+useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
 nhcookie: "cf_clearance=nf6jDvRzxbMsAhFxb84XFO4bjnQbIDP_MNxkjTjmP9E-1738444635-1.2.1.1-GwZsr2PKUupiKiOMDVg38C5lgAR3eFzia2hcRSLqkyf3hzjtBgzVKtemOH5HGVExaKzUCAknZA4OptZQhEjwO7SPsHolXYTT2xt2yhO4EWGDYo_9EppaL4NtX8oWSPsFbqjyyjtKXWSNmUwZpcJ8QOg4cPMn_4Ib0M0Bc2z0HTXZcBOq76gb2JhLq_2Or8Vb5n0lW_wRxM750CywHSRwVJFEc4ynnDEdIpIC7H6PgJp343EncOIKYmaD0qI.zbqAcAAkGIvmq5N1yONJUg1BhIUUDw_QLN8rFfFZtv0Q_8ZyrSWlVdRva1JsxqFva9RuydiFGG.iEFLARGN27GuBZg; session-affinity=1738444638.284.25.570409|2968378f2272707dac237fc5e1f12aaf; csrftoken=EpHMDMRd51RVToZdlir1ndOLWpcJwsln"
 http_server:
   host: "" # put your host for webhook here

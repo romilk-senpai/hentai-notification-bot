@@ -106,7 +106,9 @@ func (c *Controller) getUpdates(event events.Event) (err error) {
 			remoteQuantity, err := parser.ParseQuantity(tagGroup)
 
 			if err != nil {
-				return e.Wrap("parser error", err)
+				responseBuilder.WriteString(fmt.Sprintf("\t<a href=\"%s\">%s (%s)</a>\n", parser.QueryToLink(tagGroup), parser.ParserName(), "ERROR 😭"))
+				fmt.Printf("%s parser error: %s", parser.ParserName(), err.Error())
+				continue
 			}
 
 			savedQuantity, ok := parserMap[parser.ParserName()]

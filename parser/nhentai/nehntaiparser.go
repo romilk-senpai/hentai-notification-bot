@@ -19,7 +19,6 @@ import (
 
 const (
 	ParserName = "nhentai"
-	UserAgent  = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
 )
 
 type Parser struct {
@@ -150,7 +149,7 @@ func (p *Parser) doRequest(path string, rawQuery string) (data []byte, err error
 
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 
-	req.Header.Add("User-Agent", UserAgent)
+	req.Header.Add("User-Agent", p.cfg.UserAgent)
 	req.Header.Add("Cookie", p.cfg.Nhcookie)
 
 	if err != nil {
