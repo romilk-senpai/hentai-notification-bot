@@ -133,7 +133,7 @@ func (c *Controller) getUpdates(event events.Event) (err error) {
 			mangoes, err := parser.ParseAll(tagGroup)
 
 			if err != nil {
-				return err
+				return e.Wrap(parser.ParserName()+"error:", err)
 			}
 
 			if len(mangoes) == 0 {

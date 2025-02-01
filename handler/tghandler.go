@@ -12,23 +12,19 @@ import (
 type TgHandler struct {
 	tgClient  *tgclient.Client
 	processor events.Processor
+	cfg       *config.Config
 }
 
-func NewTgHanlder(tgClient *tgclient.Client, processor events.Processor) *TgHandler {
+func NewTgHanlder(cfg *config.Config, tgClient *tgclient.Client, processor events.Processor) *TgHandler {
 	return &TgHandler{
+		cfg:       cfg,
 		tgClient:  tgClient,
 		processor: processor,
 	}
 }
 
 func (h *TgHandler) Run() error {
-	cfg, err := config.Load()
-
-	if err != nil {
-		return err
-	}
-
-	err = h.tgClient.SetWebhook(cfg.HTTPServer.Host + "/tgevent")
+	err := h.tgClient.SetWebhook(h.cfg.HTTPServer.Host + "/tgevent")
 
 	if err != nil {
 		log.Fatal("failed to set webhook ", err)
@@ -39,10 +35,10 @@ func (h *TgHandler) Run() error {
 
 	srv := &http.Server{
 		Handler:      mux,
-		Addr:         cfg.HTTPServer.Address,
-		WriteTimeout: cfg.HTTPServer.Timeout,
-		ReadTimeout:  cfg.HTTPServer.Timeout,
-		IdleTimeout:  cfg.HTTPServer.IdleTimeout,
+		Addr:         h.cfg.HTTPServer.Address,
+		WriteTimeout: h.cfg.HTTPServer.Timeout,
+		ReadTimeout:  h.cfg.HTTPServer.Timeout,
+		IdleTimeout:  h.cfg.HTTPServer.IdleTimeout,
 	}
 
 	if err := srv.ListenAndServe(); err != nil {

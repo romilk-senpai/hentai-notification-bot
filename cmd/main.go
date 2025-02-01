@@ -6,6 +6,7 @@ import (
 	tgcontroller "hentai-notification-bot-re/controller/telegram"
 	parseflag "hentai-notification-bot-re/flag"
 	"hentai-notification-bot-re/handler"
+	"hentai-notification-bot-re/lib/e/config"
 	"hentai-notification-bot-re/parser"
 	"hentai-notification-bot-re/parser/hentaifox"
 	"hentai-notification-bot-re/parser/nhentai"
@@ -27,7 +28,13 @@ func Main() {
 		log.Fatal("Telegram Token is empty")
 	}
 
-	parsers := []parser.Parser{nhentai.New(nhentaiHost), hentaifox.New(hentaifoxHost)}
+	cfg, err := config.Load()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	parsers := []parser.Parser{nhentai.New(nhentaiHost, cfg), hentaifox.New(hentaifoxHost)}
 
 	var repo jsonrepository.JsonRepository[*tgcontroller.UserInfo]
 	tgRepo := repo.New("local-cache")
@@ -41,8 +48,9 @@ func Main() {
 	var h handler.Handler
 
 	if parseflag.WithWebhook {
-		h = handler.NewTgHanlder(tgClient, tgController)
+		h = handler.NewTgHanlder(cfg, tgClient, tgController)
 	} else {
+		tgClient.SetWebhook("")
 		h = handler.NewLocalHandler(tgController, tgController, batchSize)
 	}
 

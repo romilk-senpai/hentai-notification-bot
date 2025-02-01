@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"hentai-notification-bot-re/lib/e"
+	"hentai-notification-bot-re/lib/e/config"
 	"hentai-notification-bot-re/parser"
 	"io"
 	"log"
@@ -18,19 +19,20 @@ import (
 
 const (
 	ParserName = "nhentai"
-	UserAgent  = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
-	Cookie     = "cf_clearance=YzqnqFuJdVXXB9oUz7T7ZeY79jpNb06u2lLyjF.0VGI-1718156477-1.0.1.1-jxq9tbq.0QB6ZSyI8APTWE7bf00aR4XoQ0v6iLoJX0d10DqPxIKOGhdX6qOLu5PHkUXLGaQgD7UpAJ50q1mjqw; csrftoken=4SzoyNaaweXt7ifwyBOoCdjs97t0OGRRdfZuP9DNO8LmRT7WLdMRhc658j8QCJEk;"
+	UserAgent  = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
 )
 
 type Parser struct {
 	host   string
 	client http.Client
+	cfg    *config.Config
 }
 
-func New(host string) *Parser {
+func New(host string, cfg *config.Config) *Parser {
 	return &Parser{
 		host:   host,
 		client: http.Client{},
+		cfg:    cfg,
 	}
 }
 
@@ -149,7 +151,7 @@ func (p *Parser) doRequest(path string, rawQuery string) (data []byte, err error
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 
 	req.Header.Add("User-Agent", UserAgent)
-	req.Header.Add("Cookie", Cookie)
+	req.Header.Add("Cookie", p.cfg.Nhcookie)
 
 	if err != nil {
 		return nil, err

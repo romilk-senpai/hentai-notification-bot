@@ -104,7 +104,7 @@ func (c *Controller) Fetch(limit int) ([]events.Event, error) {
 	updates, err := c.client.FetchUpdates(c.offset, limit)
 
 	if err != nil {
-		return nil, e.Wrap("can't get controller", err)
+		return nil, e.Wrap("can't fetch updates", err)
 	}
 
 	if len(updates) == 0 {

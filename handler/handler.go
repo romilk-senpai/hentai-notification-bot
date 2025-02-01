@@ -25,7 +25,7 @@ func (h *LocalHandler) Run() error {
 		gotEvents, err := h.fetcher.Fetch(h.batchSize)
 
 		if err != nil {
-			log.Printf("[ERR] consumer: %s", err.Error())
+			log.Printf("[ERR] handler: %s", err.Error())
 
 			continue
 		}
